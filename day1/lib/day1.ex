@@ -11,7 +11,6 @@ defmodule Day1 do
   def cycle(deltas) do
     Stream.cycle(deltas)
     |> Enum.take(Enum.count(deltas)*145)
-    |> IO.inspect()
   end
 
   def next_value(f, cycle) do
@@ -19,7 +18,6 @@ defmodule Day1 do
       |> Enum.take(1)
       |> Enum.map(fn delta -> f + delta end)
       |> hd()
-      |> IO.inspect()
   end
 
   def sequence(deltas) when is_list(deltas) do
@@ -40,17 +38,22 @@ defmodule Day1 do
       end
   end
 
-  def read_deltas(name \\ "frequencies.txt") do
+  def read_entries(name \\ "frequencies.txt") do
     File.stream!(name)
     |> Stream.map(fn x ->
       String.trim(x, "\n")
     end)
+    |> Enum.to_list()
+  end
+
+  def read_deltas() do
+    read_entries()
     |> Stream.map(&String.to_integer/1)
     |> Enum.to_list()
   end
 
-  def solution() do
-    read_deltas("frequencies.txt")
+  def solution1() do
+    read_deltas()
     |> calibrate_frequency()
   end
 
