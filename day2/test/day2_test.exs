@@ -16,4 +16,13 @@ defmodule Day2Test do
     |> Enum.map(&Day2.score_box_id/1)
     |> Day2.checksum() == 6916
   end
+
+  test "finds ids that are the closest matches to each other" do
+    assert Day2.closest_ids() ==
+      {"oeylbtcxjqnzhgkyylfapviusr", "oeylbtcxjqnzhgyyylfapviusr"}
+  end
+
+  test "finds the common characers between two ids" do
+    assert Day2.matching_profile({"oeylbtcxjqnzhgkyylfapviusr", "oeylbtcxjqnzhgyyylfapviusr"}) == "oeylbtcxjqnzhgyylfapviusr"
+  end
 end
