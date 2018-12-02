@@ -10,20 +10,20 @@ defmodule Day1 do
 
   def cycle(deltas) do
     Stream.cycle(deltas)
-    |> Enum.take(Enum.count(deltas)*145)
+    |> Enum.take(Enum.count(deltas) * 145)
   end
 
   def next_value(f, cycle) do
-      cycle
-      |> Enum.take(1)
-      |> Enum.map(fn delta -> f + delta end)
-      |> hd()
+    cycle
+    |> Enum.take(1)
+    |> Enum.map(fn delta -> f + delta end)
+    |> hd()
   end
 
   def sequence(deltas) when is_list(deltas) do
     f = 0
     cycle = cycle(deltas)
-    freq =  Map.put(%{}, f, 1)
+    freq = Map.put(%{}, f, 1)
     sequence({freq, f, cycle})
   end
 
@@ -32,10 +32,10 @@ defmodule Day1 do
     freq_value = Map.get(freq, new_f, 0) + 1
     new_freq = Map.put(freq, new_f, freq_value)
 
-      case (freq_value == 2) do
-        true -> new_f
-        false -> sequence({new_freq, new_f, Enum.drop(cycle, 1)})
-      end
+    case freq_value == 2 do
+      true -> new_f
+      false -> sequence({new_freq, new_f, Enum.drop(cycle, 1)})
+    end
   end
 
   def read_entries(name \\ "frequencies.txt") do

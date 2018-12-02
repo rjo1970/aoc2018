@@ -10,9 +10,9 @@ defmodule Day2 do
   end
 
   def letter_frequencies(box_id) do
-      letters(box_id)
-      |> Enum.group_by(fn x -> x end)
-      |> Enum.map(fn {k, v} -> {k, Enum.count(v)} end)
+    letters(box_id)
+    |> Enum.group_by(fn x -> x end)
+    |> Enum.map(fn {k, v} -> {k, Enum.count(v)} end)
   end
 
   def has_pair?(freq) do
@@ -62,5 +62,4 @@ defmodule Day2 do
     |> Enum.map(fn {x, _y} -> x end)
     |> Enum.join("")
   end
-
 end
