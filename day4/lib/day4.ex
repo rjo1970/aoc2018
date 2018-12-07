@@ -6,7 +6,7 @@ defmodule Day4 do
   end
 
   def parse_entry(entry) do
-    [_, day, hour, min] = Regex.run(~r/\[\d{4}-\d{2}-(\d{2}) (\d{2}):(\d{2})\]/, entry)
+    [_, month, day, hour, min] = Regex.run(~r/\[\d{4}-(\d{2})-(\d{2}) (\d{2}):(\d{2})\]/, entry)
 
     [_, guard] =
       case Regex.run(~r/Guard #(\d+) begins shift/, entry) do
@@ -18,6 +18,7 @@ defmodule Day4 do
     awake = Regex.match?(~r/wakes up/, entry)
 
     %{
+      month: String.to_integer(month),
       day: String.to_integer(day),
       hour: String.to_integer(hour),
       min: String.to_integer(min),
@@ -41,13 +42,13 @@ defmodule Day4 do
 
     [last_asleep, _last_awake] =
       case head.asleep do
-        true -> [[head.hour, head.min], false]
+        true -> [[head.day * head.month * head.month, head.min], false]
         false -> [step.last_asleep, step.last_awake]
       end
 
     last_awake =
       case head.awake do
-        true -> [head.hour, head.min - 1]
+        true -> [head.day * head.month * head.month, head.min - 1]
         false -> false
       end
 
@@ -67,8 +68,8 @@ defmodule Day4 do
     })
   end
 
-  def minute_blocks({guard, [sh, sm], [fh, fm]}) do
-    minutes = for h <- sh..fh, m <- sm..fm, do: {h, m}
+  def minute_blocks({guard, [sd, sm], [fd, fm]}) do
+    minutes = for d <- sd..fd, m <- sm..fm, do: {d, m}
     {guard, minutes}
   end
 
@@ -93,23 +94,41 @@ defmodule Day4 do
   end
 
   def sofar() do
-    Day4.read_schedule()
-    |> Day4.guard_duty()
-    |> Enum.map(&Day4.minute_blocks/1)
-    |> Day4.combine_by_guard()
+    map =
+      Day4.read_schedule()
+      |> Day4.guard_duty()
+      |> Enum.map(&Day4.minute_blocks/1)
+      |> Day4.combine_by_guard()
+
+    IO.inspect(map["1217"])
+
+    Map.keys(map)
+    |> Enum.map(fn k ->
+      {k, as_minutes(map, k), golden_hours(map, k)}
+    end)
   end
 
-  def golden_hours(guard_map) do
-    guard_map
-    |> Enum.map(fn {k, v} ->
-      {k,
-       v
-       |> List.flatten()
-       |> Enum.group_by(fn x -> x end)
-       |> Enum.map(fn {k1, v1} -> {k1, Enum.count(v1)} end)
-       |> Enum.sort(fn {_ka, va}, {_kb, vb} -> va > vb end)
-       |> Enum.take(1)
-       |> hd()}
+  def as_minutes(map, key) do
+    map
+    |> Map.get(key)
+    |> List.flatten()
+    |> Enum.group_by(fn {day, _} -> day end)
+    |> Enum.map(fn {_k, v} -> v |> Enum.map(fn {_day, minute} -> minute end) end)
+    |> List.flatten()
+    |> Enum.reduce(%{}, fn s, a ->
+      Map.update(a, s, 1, fn x -> x + 1 end)
     end)
+    |> Enum.sort(fn {{ak, av}, {bk, bv}} -> av > bv end)
+    |> IO.inspect()
+  end
+
+  def golden_hours(guard_map, key) do
+    size =
+      guard_map
+      |> Map.get(key)
+      |> List.flatten()
+      |> Enum.count()
+
+    {key, size}
   end
 end
