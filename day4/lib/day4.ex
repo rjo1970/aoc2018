@@ -93,18 +93,16 @@ defmodule Day4 do
     combine_by_guard({new_guards, tail})
   end
 
-  def sofar() do
+  def solutions() do
     map =
       Day4.read_schedule()
       |> Day4.guard_duty()
       |> Enum.map(&Day4.minute_blocks/1)
       |> Day4.combine_by_guard()
 
-    IO.inspect(map["1217"])
-
     Map.keys(map)
     |> Enum.map(fn k ->
-      {k, as_minutes(map, k), golden_hours(map, k)}
+      {k, as_minutes(map, k), most_for_minute(map, k), golden_hours(map, k)}
     end)
   end
 
@@ -118,7 +116,28 @@ defmodule Day4 do
     |> Enum.reduce(%{}, fn s, a ->
       Map.update(a, s, 1, fn x -> x + 1 end)
     end)
-    |> Enum.sort(fn {{ak, av}, {bk, bv}} -> av > bv end)
+    |> Enum.sort(fn {ak, av}, {bk, bv} -> av > bv end)
+    |> IO.inspect()
+  end
+
+  def most_for_minute(map, key) do
+    map
+    |> Map.get(key)
+    |> List.flatten()
+    |> Enum.group_by(fn {day, _} -> day end)
+    |> Enum.map(fn {k, v} ->
+      minutes =
+        v
+        |> Enum.map(fn {_day, minute} -> minute end)
+
+      minutes
+    end)
+    |> List.flatten()
+    |> Enum.reduce(%{}, fn s, a ->
+      Map.update(a, s, 1, fn x -> x + 1 end)
+    end)
+    |> Enum.sort(fn {ak, av}, {bk, bv} -> av > bv end)
+    |> Enum.take(1)
     |> IO.inspect()
   end
 
