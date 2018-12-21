@@ -14,6 +14,10 @@ defmodule Day9.Game do
     {:reply, :l8r, state}
   end
 
+  def handle_call(:pickup, _from, state) do
+    {:reply, :l8r, state}
+  end
+
   ########### IMPL ##########
 
   def find_current(state) do
@@ -35,12 +39,55 @@ defmodule Day9.Game do
     Map.get(state, right1.right)
   end
 
+  def seven_left(state) do
+    current = find_current(state)
+    left = Map.get(state, current.left)
+    left = Map.get(state, left.left)
+    left = Map.get(state, left.left)
+    left = Map.get(state, left.left)
+    left = Map.get(state, left.left)
+    left = Map.get(state, left.left)
+    Map.get(state, left.left)
+  end
+
   def nothing_current(state) do
     state
     |> Enum.map(fn {k, v} ->
       {k, Map.put(v, :current, false)}
     end)
     |> Map.new()
+  end
+
+  defp connect_ends(state, a, a) do
+    a =
+      a
+      |> Map.put(:left, a.id)
+      |> Map.put(:right, a.id)
+
+    Map.put(state, a.id, a)
+  end
+
+  defp connect_ends(state, a, b) do
+    a =
+      a
+      |> Map.put(:right, b.id)
+
+    b =
+      b
+      |> Map.put(:left, a.id)
+
+    state
+    |> Map.put(a.id, a)
+    |> Map.put(b.id, b)
+  end
+
+  def remove(state, id) do
+    marble = Map.get(state, id)
+    left = Map.get(state, marble.left)
+    right = Map.get(state, marble.right)
+
+    connect_ends(state, left, right)
+    |> Map.delete(id)
   end
 
   def insert(state, a, a, n) do
@@ -73,13 +120,13 @@ defmodule Day9.Game do
     |> Map.put(right2.id, right2)
   end
 
-  def insert_marble(0, %{}) do
+  def insert_marble(%{}, 0) do
     %{
       0 => %Day9.Marble{id: 0, current: true, left: 0, right: 0}
     }
   end
 
-  def insert_marble(n, state) do
+  def insert_marble(state, n) do
     right1 = one_right(state)
     right2 = two_right(state)
     state = nothing_current(state)
